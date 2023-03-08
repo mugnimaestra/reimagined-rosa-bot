@@ -8,7 +8,7 @@
     "ngrok": "ngrok http 3000 --authtoken=$(grep NGROK_AUTHTOKEN .env | cut -d '=' -f2)",
     "debug": "npm-run-all -p start ngrok",
     "prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,html,css,json,md}\"",
-    "prettier-quick": "pretty-quick --staged '**/*.{js,jsx,ts,tsx}'",
+    "pretty-quick": "pretty-quick --staged '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install"
   },
   "type": "module",
