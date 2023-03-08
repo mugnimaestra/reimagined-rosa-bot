@@ -40,6 +40,14 @@ app.post('/webhook', (req: Request, res: Response) => {
   res.sendStatus(200);
 });
 
+app.get('/healthcheck', (req: Request, res: Response) => {
+  // Set the response HTTP header with HTTP status and Content type
+  res.writeHead(200, { "Content-Type": "text/plain" });
+
+  // Send the response body "Hello World"
+  res.end("Hello World\n");
+});
+
 // function for handling incoming text messages
 function handleTextMessage(event: MessageEvent): void {
   if (event.type !== 'message' || event.message.type !== 'text') {
