@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { Client, WebhookEvent, MessageEvent, TextMessage } from '@line/bot-sdk';
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
 if (!process.env.LINE_CHANNEL_SECRET) {
   dotenv.config();
@@ -24,7 +24,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 app.post('/webhook', (req: Request, res: Response) => {
   const events: WebhookEvent[] = req.body.events;
 
-  events.forEach((event) => {
+  events.forEach(event => {
     switch (event.type) {
       case 'message':
         handleTextMessage(event as MessageEvent);
@@ -42,10 +42,10 @@ app.post('/webhook', (req: Request, res: Response) => {
 
 app.get('/healthcheck', (req: Request, res: Response) => {
   // Set the response HTTP header with HTTP status and Content type
-  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
 
   // Send the response body "Hello World"
-  res.end("Hello World\n");
+  res.end('Hello World\n');
 });
 
 // function for handling incoming text messages
@@ -65,7 +65,7 @@ function handleTextMessage(event: MessageEvent): void {
     .then(() => {
       console.log(`Sent reply message to user: ${userId}`);
     })
-    .catch((err) => {
+    .catch(err => {
       console.error(err);
     });
 }
@@ -76,12 +76,12 @@ function handleUnsendEvent(event: WebhookEvent): void {
 }
 
 // function for creating a reply message
-function createReplyMessage(message: string): TextMessage {
+const createReplyMessage = (message: string): TextMessage => {
   return {
     type: 'text',
     text: `You said: ${message}`,
   };
-}
+};
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

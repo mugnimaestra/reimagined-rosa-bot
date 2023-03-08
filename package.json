@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node --experimental-specifier-resolution=node --loader ts-node/esm index.ts",
     "ngrok": "ngrok http 3000 --authtoken=$(grep NGROK_AUTHTOKEN .env | cut -d '=' -f2)",
-    "debug": "npm-run-all -p start ngrok"
+    "debug": "npm-run-all -p start ngrok",
+    "prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,html,css,json,md}\"",
+    "prettier-quick": "pretty-quick --staged '**/*.{js,jsx,ts,tsx}'",
+    "prepare": "husky install"
   },
   "type": "module",
   "author": "",
@@ -18,6 +21,7 @@
     "ngrok": "^4.3.3",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.4",
+    "pretty-quick": "^3.1.3",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
   },
@@ -26,10 +30,5 @@
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged '**/*.{js,jsx,ts,tsx}'"
-    }
   }
 }
