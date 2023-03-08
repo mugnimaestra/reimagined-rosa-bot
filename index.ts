@@ -40,12 +40,12 @@ app.post('/webhook', (req: Request, res: Response) => {
   res.sendStatus(200);
 });
 
-app.get('/healthcheck', (req: Request, res: Response) => {
+app.get('*', (req: Request, res: Response) => {
   // Set the response HTTP header with HTTP status and Content type
   res.writeHead(200, { 'Content-Type': 'text/plain' });
 
   // Send the response body "Hello World"
-  res.end('Hello World\n');
+  res.end('Rosa bot is running\n');
 });
 
 // function for handling incoming text messages
@@ -60,14 +60,29 @@ const handleTextMessage = (event: MessageEvent): void => {
 
   const replyMessage = createReplyMessage(message);
 
-  client
-    .replyMessage(event.replyToken, replyMessage)
-    .then(() => {
-      console.log(`Sent reply message to user: ${userId}`);
-    })
-    .catch(err => {
-      console.error(err);
-    });
+  console.log('process.env =', process.env.NODE_ENV, 'userId =', userId);
+
+  if (process.env.NODE_ENV === 'development') {
+    if (userId === 'Ua684ecb5c5d077e54d95a1d3ebaae15a') {
+      client
+        .replyMessage(event.replyToken, replyMessage)
+        .then(() => {
+          console.log(`Sent reply message to user: ${userId}`);
+        })
+        .catch(err => {
+          console.error(err);
+        });
+    }
+  } else {
+    client
+      .replyMessage(event.replyToken, replyMessage)
+      .then(() => {
+        console.log(`Sent reply message to user: ${userId}`);
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
 };
 
 // function for handling unsend events
@@ -79,7 +94,7 @@ const handleUnsendEvent = (event: WebhookEvent): void => {
 const createReplyMessage = (message: string): TextMessage => {
   return {
     type: 'text',
-    text: `You said: ${message}`,
+    text: `Kamu bilang: ${message}`,
   };
 };
 
