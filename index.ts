@@ -49,7 +49,7 @@ app.get('/healthcheck', (req: Request, res: Response) => {
 });
 
 // function for handling incoming text messages
-function handleTextMessage(event: MessageEvent): void {
+const handleTextMessage = (event: MessageEvent): void => {
   if (event.type !== 'message' || event.message.type !== 'text') {
     // ignore non-text messages
     return;
@@ -68,12 +68,12 @@ function handleTextMessage(event: MessageEvent): void {
     .catch(err => {
       console.error(err);
     });
-}
+};
 
 // function for handling unsend events
-function handleUnsendEvent(event: WebhookEvent): void {
+const handleUnsendEvent = (event: WebhookEvent): void => {
   console.log(`Unsend event received: ${JSON.stringify(event)}`);
-}
+};
 
 // function for creating a reply message
 const createReplyMessage = (message: string): TextMessage => {
