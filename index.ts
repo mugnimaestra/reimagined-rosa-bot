@@ -1,21 +1,13 @@
-import express, { Request, Response, NextFunction } from 'express';
-import { Client, WebhookEvent, MessageEvent, TextMessage } from '@line/bot-sdk';
-import dotenv from 'dotenv';
-
-if (!process.env.LINE_CHANNEL_SECRET) {
-  dotenv.config();
-}
+import express, { Request, Response } from 'express';
+import { WebhookEvent, MessageEvent } from '@line/bot-sdk';
+import { client, createTextMessage, handleUnsendEvent } from '@/bot';
 
 const app = express();
-const client = new Client({
-  channelSecret: process.env.LINE_CHANNEL_SECRET!,
-  channelAccessToken: process.env.LINE_ACCESS_TOKEN!,
-});
 
 app.use(express.json());
 
 // error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _: Request, res: Response) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
@@ -41,11 +33,8 @@ app.post('/webhook', (req: Request, res: Response) => {
 });
 
 app.get('*', (req: Request, res: Response) => {
-  // Set the response HTTP header with HTTP status and Content type
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-
-  // Send the response body "Hello World"
-  res.end('Rosa bot is running\n');
+  res.end('Rosa bot is running');
 });
 
 // function for handling incoming text messages
@@ -58,12 +47,11 @@ const handleTextMessage = (event: MessageEvent): void => {
   const userId = event.source.userId;
   const message = event.message.text;
 
-  const replyMessage = createReplyMessage(message);
-
-  console.log('process.env =', process.env.NODE_ENV, 'userId =', userId);
+  const replyMessage = createTextMessage(message);
 
   if (process.env.NODE_ENV === 'development') {
     if (userId === 'Ua684ecb5c5d077e54d95a1d3ebaae15a') {
+      // this make the bot only listen to my account
       client
         .replyMessage(event.replyToken, replyMessage)
         .then(() => {
@@ -83,19 +71,6 @@ const handleTextMessage = (event: MessageEvent): void => {
         console.error(err);
       });
   }
-};
-
-// function for handling unsend events
-const handleUnsendEvent = (event: WebhookEvent): void => {
-  console.log(`Unsend event received: ${JSON.stringify(event)}`);
-};
-
-// function for creating a reply message
-const createReplyMessage = (message: string): TextMessage => {
-  return {
-    type: 'text',
-    text: `Kamu bilang: ${message}`,
-  };
 };
 
 const port = process.env.PORT || 3000;

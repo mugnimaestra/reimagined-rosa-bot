@@ -11,17 +11,16 @@
     "strict": true,
     "noImplicitAny": true,
     "useUnknownInCatchVariables": false,
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "ts-node": {
-      "esm": true
+    "esm": true
   },
   "lib": ["esnext"],
-  "include": [
-    "*"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+  "include": ["*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }
