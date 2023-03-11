@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Rework Rosa bot for line messenger platform from scratch",
   "main": "index.ts",
+  "type": "module",
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node --loader ts-node/esm index.ts",
+    "start": "ts-node --require tsconfig-paths/register index.ts",
     "start-local": "NODE_ENV=development nodemon",
     "ngrok": "ngrok http 3000 --authtoken=$(grep NGROK_AUTHTOKEN .env | cut -d '=' -f2) --log=stdout | grep -o -E \"https://[^\\\"]+\"",
     "debug": "npm-run-all -p start-local ngrok",
@@ -12,7 +13,6 @@
     "pretty-quick": "pretty-quick --staged '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install"
   },
-  "type": "module",
   "author": "",
   "license": "ISC",
   "devDependencies": {
