@@ -11,7 +11,7 @@
     "debug": "npm-run-all -p start-local ngrok",
     "prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,html,css,json,md}\"",
     "pretty-quick": "pretty-quick --staged '**/*.{js,jsx,ts,tsx}'",
-    "prepare": "husky install"
+    "prepare": "npx husky install"
   },
   "author": "",
   "license": "ISC",
