@@ -1,36 +1,19 @@
-FROM debian:bullseye as builder
+# Dockerfile for Node.js app
 
-ARG NODE_VERSION=18.14.2
+# specify the base image
+FROM node:14-alpine
 
-RUN apt-get update; apt install -y curl python-is-python3 pkg-config build-essential
-RUN curl https://get.volta.sh | bash
-ENV VOLTA_HOME /root/.volta
-ENV PATH /root/.volta/bin:$PATH
-RUN volta install node@${NODE_VERSION}
-
-#######################################################################
-
-RUN mkdir /app
+# set the working directory
 WORKDIR /app
 
-# NPM will not install any package listed in "devDependencies" when NODE_ENV is set to "production",
-# to install all modules: "npm install --production=false".
-# Ref: https://docs.npmjs.com/cli/v9/commands/npm-install#description
+# copy package.json and package-lock.json
+COPY package*.json ./
 
-ENV NODE_ENV production
+# install dependencies
+RUN npm install --production
 
+# copy the rest of the app files
 COPY . .
 
-RUN npm install --production=false
-FROM debian:bullseye
-
-LABEL fly_launch_runtime="nodejs"
-
-COPY --from=builder /root/.volta /root/.volta
-COPY --from=builder /app /app
-
-WORKDIR /app
-ENV NODE_ENV production
-ENV PATH /root/.volta/bin:$PATH
-
-CMD [ "npm", "run", "start" ]
+# set the command to run the app
+CMD ["npm", "start"]

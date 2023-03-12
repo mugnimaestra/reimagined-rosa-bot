@@ -1,0 +1,31 @@
+# fly.toml file generated for nodejs app
+# web servers listen on port 3000
+[build]
+  # the builder specifies how to build your application
+  builder = "heroku/buildpacks:20"
+
+[env]
+  # set your environment variables
+  NODE_ENV = "production"
+  PORT = 3000
+
+[experimental]
+  # use the container registry
+  builder = "registry.heroku.com/buildpacks/nodejs"
+  # run the container on the latest version of the v8 stack
+  run_image = "registry.fly.io/v8:v8.10.0"
+
+# specify your app and process type
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+
+  # the command to start your app
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+
+  # specify the docker image to use
+  [[services.ports]]
+    handlers = ["http"]
+    port = "80"
