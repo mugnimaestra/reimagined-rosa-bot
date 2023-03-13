@@ -1,20 +1,21 @@
 {
-  "name": "rosa-bot-v2",
+  "name": "reimagined-rosa-bot",
   "version": "1.0.0",
   "description": "Rework Rosa bot for line messenger platform from scratch",
   "main": "index.ts",
   "engines": {
     "node": "14.x"
   },
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
-    "start": "ts-node --require tsconfig-paths/register index.ts",
-    "start-local": "NODE_ENV=development nodemon",
+    "start": "node dist/index.js",
+    "dev": "nodemon index.ts --exec ts-node",
     "ngrok": "ngrok http 3000 --authtoken=$(grep NGROK_AUTHTOKEN .env | cut -d '=' -f2) --log=stdout | grep -o -E \"https://[^\\\"]+\"",
-    "debug": "npm-run-all -p start-local ngrok",
+    "debug": "npm-run-all -p dev ngrok",
     "prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,html,css,json,md}\"",
     "pretty-quick": "pretty-quick --staged '**/*.{js,jsx,ts,tsx}'",
-    "prepare": "npx husky install"
+    "prepare": "npx husky install",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",

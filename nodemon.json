@@ -1,5 +1,0 @@
-{
-  "watch": ["src", "index.ts", "bot.ts"],
-  "ext": "ts",
-  "exec": "ts-node --require tsconfig-paths/register index.ts"
-}

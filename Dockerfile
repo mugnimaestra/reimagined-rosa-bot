@@ -1,19 +1,28 @@
-# Dockerfile for Node.js app
-
-# specify the base image
+# Use an official lightweight Node.js image
 FROM node:14-alpine
 
-# set the working directory
-WORKDIR /app
+# Create app directory
+WORKDIR /usr/src/app
 
-# copy package.json and package-lock.json
+# Install app dependencies
 COPY package*.json ./
+RUN npm install
 
-# install dependencies
-RUN npm install --production
-
-# copy the rest of the app files
+# Copy source code
 COPY . .
 
-# set the command to run the app
+# Set environment variables
+ENV LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
+ENV LINE_ACCESS_TOKEN=${LINE_ACCESS_TOKEN}
+
+# Build TypeScript to JavaScript
+RUN npm run build
+
+# Remove devDependencies
+RUN npm prune --production
+
+# Expose port
+EXPOSE 3000
+
+# Start the app
 CMD ["npm", "start"]
