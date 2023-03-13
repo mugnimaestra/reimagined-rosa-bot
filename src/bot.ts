@@ -45,13 +45,17 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
   if ((event.message.text.match(reelUrlRegex) ?? '')?.length > 0) {
     const reelUrl = event.message.text.match(reelUrlRegex)?.[0];
     if (typeof reelUrl === 'string') {
-      console.log('masuk ke url reels');
-      message = await downloadReels(reelUrl);
+      const videoUrl = await downloadReels(reelUrl);
+      message = videoUrl;
     }
   }
 
   if (message) {
-    client.replyMessage(event.replyToken, createTextMessage(message));
+    client
+      .replyMessage(event.replyToken, createTextMessage(message))
+      .catch(err => {
+        console.log('what the heck kok error?', err);
+      });
   }
 };
 
