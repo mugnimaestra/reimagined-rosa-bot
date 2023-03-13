@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { WebhookEvent, MessageEvent } from '@line/bot-sdk';
-import { handleTextMessage, handleUnsendEvent } from './bot';
+import { handleTextMessage, handleUnsendEvent } from './src/bot';
 
 const app = express();
 
