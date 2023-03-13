@@ -8,3 +8,6 @@ npm-debug.log
 # Visual Studio Code
 .vscode
 .env
+
+# Build files
+dist
