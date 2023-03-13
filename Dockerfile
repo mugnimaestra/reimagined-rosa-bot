@@ -14,6 +14,7 @@ COPY . .
 # Set environment variables
 ENV LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
 ENV LINE_ACCESS_TOKEN=${LINE_ACCESS_TOKEN}
+ENV PORT=${PORT:-3000}
 
 # Build TypeScript to JavaScript
 RUN npm run build
@@ -22,7 +23,7 @@ RUN npm run build
 RUN npm prune --production
 
 # Expose port
-EXPOSE 3000
+EXPOSE $PORT
 
 # Start the app
 CMD ["npm", "start"]
