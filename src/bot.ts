@@ -1,8 +1,12 @@
 import { Client, TextMessage, MessageEvent, WebhookEvent } from '@line/bot-sdk';
 import dotenv from 'dotenv';
 import { Mention, MentionTextMessage } from '../types.js';
-import { reelUrlRegex } from './constant';
-import { downloadReels, pickAnOption } from './functions';
+import { reelUrlRegex, teraboxUrlRegex } from './constant';
+import {
+  downloadReels,
+  pickAnOption,
+  extractTeraboxDirectLink,
+} from './functions';
 
 if (!process.env.LINE_CHANNEL_SECRET) {
   dotenv.config();
@@ -47,6 +51,15 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
     if (typeof reelUrl === 'string') {
       const videoUrl = await downloadReels(reelUrl);
       message = videoUrl;
+    }
+  }
+
+  // #3 extract direct url from terabox
+  if ((event.message.text.match(teraboxUrlRegex) ?? '')?.length > 0) {
+    const teraboxUrl = event.message.text.match(teraboxUrlRegex)?.[0];
+    if (typeof teraboxUrl === 'string') {
+      const directFileUrl = await extractTeraboxDirectLink(teraboxUrl);
+      message = directFileUrl;
     }
   }
 
