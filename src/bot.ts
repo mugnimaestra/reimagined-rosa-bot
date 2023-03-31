@@ -1,5 +1,9 @@
-import { Client, TextMessage, MessageEvent, WebhookEvent } from '@line/bot-sdk';
+import { Client, MessageEvent, WebhookEvent } from '@line/bot-sdk';
+import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
+import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
+import * as childProcess from 'child_process';
+import { promisify } from 'util';
 import { Mention, MentionTextMessage } from '../types.js';
 import { reelUrlRegex, teraboxUrlRegex } from './constant';
 import {
@@ -11,6 +15,8 @@ import {
 if (!process.env.LINE_CHANNEL_SECRET) {
   dotenv.config();
 }
+
+// #1 LINE Messenger Bot Section
 
 export const client = new Client({
   channelSecret: process.env.LINE_CHANNEL_SECRET!,
@@ -124,3 +130,65 @@ export const handleUnsendEvent = async (event: WebhookEvent): Promise<void> => {
     );
   }
 };
+
+// #2 Telegram Bot Section
+
+const exec = promisify(childProcess.exec);
+
+// create a Map object to store the direct links
+const dictionary = new Map();
+
+// webhook endpoint for handling incoming Telegram updates
+export const telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, {
+  polling: false,
+});
+
+// Start the bot and get the last update ID
+let lastUpdateId = 0;
+telegramBot.getUpdates({ offset: -1 }).then(updates => {
+  if (updates.length > 0) {
+    lastUpdateId = updates[updates.length - 1].update_id + 1;
+  }
+  telegramBot.startPolling();
+});
+
+telegramBot.on('message', async message => {
+  // Handle Telegram message here
+  if (dictionary.size > 10) dictionary.clear();
+
+  // section for handling text message
+  if (message.text && message.text.startsWith('/terabox ')) {
+    const teraboxUrl = message.text.replace('/terabox ', '');
+    const teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
+
+    // create the inline keyboard with the direct link as a callback query data
+    // generate a unique ID for the direct link
+    const linkId = uuidv4();
+    dictionary.set(linkId, teraboxResponse.directUrl);
+    // create the inline keyboard with the direct link as an href URL button
+    const inlineKeyboard: InlineKeyboardButton[][] = [
+      [
+        {
+          text: '✅ Download the file',
+          url: teraboxResponse.directUrl,
+        },
+      ],
+    ];
+
+    // send a message with the inline keyboard to the chat where the command was sent
+    telegramBot.sendMessage(
+      message.chat.id,
+      `Here's the direct link for file\nTitle: ${teraboxResponse.rawResponse?.title}`,
+      {
+        reply_markup: {
+          inline_keyboard: inlineKeyboard,
+        },
+        reply_to_message_id: message.message_id,
+      }
+    );
+  }
+});
+
+telegramBot.on('polling_error', error => {
+  console.error(error.message);
+});
