@@ -132,49 +132,35 @@ export const handleUnsendEvent = async (event: WebhookEvent): Promise<void> => {
 
 // webhook endpoint for handling incoming Telegram updates
 export const telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, {
-  polling: false,
+  polling: true,
 });
 
-// Start the bot and get the last update ID
-let lastUpdateId = 0;
-telegramBot.getUpdates({ offset: -1 }).then(updates => {
-  if (updates.length > 0) {
-    lastUpdateId = updates[updates.length - 1].update_id + 1;
-  }
-  telegramBot.startPolling();
-});
+telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
+  const teraboxUrl = (match ?? [])[1];
+  const teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
 
-telegramBot.on('message', async message => {
-  // Handle Telegram message here
-
-  // section for handling text message
-  if (message.text && message.text.startsWith('/terabox ')) {
-    const teraboxUrl = message.text.replace('/terabox ', '');
-    const teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
-
-    // create the inline keyboard with the direct link as a callback query data
-    // create the inline keyboard with the direct link as an href URL button
-    const inlineKeyboard: InlineKeyboardButton[][] = [
-      [
-        {
-          text: '✅ Download the file',
-          url: teraboxResponse.directUrl,
-        },
-      ],
-    ];
-
-    // send a message with the inline keyboard to the chat where the command was sent
-    telegramBot.sendMessage(
-      message.chat.id,
-      `Here's the direct link for file\nTitle: ${teraboxResponse.rawResponse?.title}`,
+  // create the inline keyboard with the direct link as a callback query data
+  // create the inline keyboard with the direct link as an href URL button
+  const inlineKeyboard: InlineKeyboardButton[][] = [
+    [
       {
-        reply_markup: {
-          inline_keyboard: inlineKeyboard,
-        },
-        reply_to_message_id: message.message_id,
-      }
-    );
-  }
+        text: '✅ Download the file',
+        url: teraboxResponse.directUrl,
+      },
+    ],
+  ];
+
+  // send a message with the inline keyboard to the chat where the command was sent
+  telegramBot.sendMessage(
+    message.chat.id,
+    `Here's the direct link for file\nTitle: ${teraboxResponse.rawResponse?.title}`,
+    {
+      reply_markup: {
+        inline_keyboard: inlineKeyboard,
+      },
+      reply_to_message_id: message.message_id,
+    }
+  );
 });
 
 telegramBot.on('polling_error', error => {
