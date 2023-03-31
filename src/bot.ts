@@ -1,9 +1,6 @@
 import { Client, MessageEvent, WebhookEvent } from '@line/bot-sdk';
 import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
-import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
-import * as childProcess from 'child_process';
-import { promisify } from 'util';
 import { Mention, MentionTextMessage } from '../types.js';
 import { reelUrlRegex, teraboxUrlRegex } from './constant';
 import {
@@ -133,11 +130,6 @@ export const handleUnsendEvent = async (event: WebhookEvent): Promise<void> => {
 
 // #2 Telegram Bot Section
 
-const exec = promisify(childProcess.exec);
-
-// create a Map object to store the direct links
-const dictionary = new Map();
-
 // webhook endpoint for handling incoming Telegram updates
 export const telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, {
   polling: false,
@@ -154,7 +146,6 @@ telegramBot.getUpdates({ offset: -1 }).then(updates => {
 
 telegramBot.on('message', async message => {
   // Handle Telegram message here
-  if (dictionary.size > 10) dictionary.clear();
 
   // section for handling text message
   if (message.text && message.text.startsWith('/terabox ')) {
@@ -162,9 +153,6 @@ telegramBot.on('message', async message => {
     const teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
 
     // create the inline keyboard with the direct link as a callback query data
-    // generate a unique ID for the direct link
-    const linkId = uuidv4();
-    dictionary.set(linkId, teraboxResponse.directUrl);
     // create the inline keyboard with the direct link as an href URL button
     const inlineKeyboard: InlineKeyboardButton[][] = [
       [
