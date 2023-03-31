@@ -1,6 +1,41 @@
 import axios from 'axios';
 
-const extractTeraboxDirectLink = async (url: string): Promise<string> => {
+interface TeraboxRawResponse {
+  errno: number;
+  request_id: number;
+  server_time: number;
+  cfrom_id: number;
+  title: string;
+  list: List[];
+  share_id: number;
+  uk: number;
+}
+
+interface List {
+  category: string;
+  fs_id: string;
+  isdir: string;
+  local_ctime: string;
+  local_mtime: string;
+  md5: string;
+  path: string;
+  play_forbid: string;
+  server_ctime: string;
+  server_filename: string;
+  server_mtime: string;
+  size: string;
+  dlink: string;
+  emd5: string;
+}
+
+interface TeraboxLinkInfo {
+  directUrl: string;
+  rawResponse: TeraboxRawResponse | null;
+}
+
+const extractTeraboxDirectLink = async (
+  url: string
+): Promise<TeraboxLinkInfo> => {
   let value_: string = url;
   if (url.includes('/shar')) {
     value_ = new URL(url).searchParams.get('surl') as string;
@@ -17,10 +52,11 @@ const extractTeraboxDirectLink = async (url: string): Promise<string> => {
       `https://trapi.iqbalrifai.eu.org/?id=${value_}`
     );
     const json = response.data;
-    return json.list[0].dlink;
+    const directUrl = json.list[0].dlink;
+    return { directUrl, rawResponse: response.data };
   } catch (error) {
     console.error(error);
-    return '';
+    return { directUrl: '', rawResponse: null };
   }
 };
 

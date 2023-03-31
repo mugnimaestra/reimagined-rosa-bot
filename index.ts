@@ -12,7 +12,7 @@ app.use((err: Error, _: Request, res: Response, __: NextFunction) => {
   res.status(500).send('Something broke!');
 });
 
-// webhook endpoint for handling incoming messages
+// webhook endpoint for handling incoming Line Messenger messages
 app.post('/webhook', (req: Request, res: Response) => {
   const events: WebhookEvent[] = req.body.events;
 
@@ -32,6 +32,7 @@ app.post('/webhook', (req: Request, res: Response) => {
   res.sendStatus(200);
 });
 
+// Root endpoint for checking server status
 app.get('*', (req: Request, res: Response) => {
   res.status(200).send('Rosa bot is running');
 });
