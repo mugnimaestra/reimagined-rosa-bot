@@ -138,29 +138,24 @@ export const telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, {
 telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
   const teraboxUrl = (match ?? [])[1];
   const teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
+  const arrayOfListFile = teraboxResponse.rawResponse?.list;
 
-  // create the inline keyboard with the direct link as a callback query data
-  // create the inline keyboard with the direct link as an href URL button
-  const inlineKeyboard: InlineKeyboardButton[][] = [
-    [
+  // create the inline keyboard with a button for each file
+  const inlineKeyboard: InlineKeyboardButton[][] | undefined =
+    arrayOfListFile?.map(file => [
       {
-        text: '✅ Download the file',
-        url: teraboxResponse.directUrl,
+        text: file.server_filename,
+        url: file.dlink,
       },
-    ],
-  ];
+    ]);
 
   // send a message with the inline keyboard to the chat where the command was sent
-  telegramBot.sendMessage(
-    message.chat.id,
-    `Here's the direct link for file\nTitle: ${teraboxResponse.rawResponse?.title}`,
-    {
-      reply_markup: {
-        inline_keyboard: inlineKeyboard,
-      },
-      reply_to_message_id: message.message_id,
-    }
-  );
+  telegramBot.sendMessage(message.chat.id, `✅ Download the file`, {
+    reply_markup: {
+      inline_keyboard: inlineKeyboard ?? [],
+    },
+    reply_to_message_id: message.message_id,
+  });
 });
 
 telegramBot.on('polling_error', error => {
