@@ -94,39 +94,39 @@ export const handleTextMessage = (event: MessageEvent): void => {
 };
 
 // function for handling unsend events
-export const handleUnsendEvent = async (event: WebhookEvent): Promise<void> => {
-  console.log(`Unsend event received: ${JSON.stringify(event)}`);
-  let target;
-  let displayName;
+// disabling it since I still find no use for this function
+// export const handleUnsendEvent = async (event: WebhookEvent): Promise<void> => {
+//   let target;
+//   let displayName;
 
-  switch (event.source.type) {
-    case 'user':
-      target = event.source.userId;
-      break;
-    case 'group':
-      target = event.source.groupId;
-      break;
-    case 'room':
-      target = event.source.roomId;
-      break;
-    default:
-      target = null;
-  }
+//   switch (event.source.type) {
+//     case 'user':
+//       target = event.source.userId;
+//       break;
+//     case 'group':
+//       target = event.source.groupId;
+//       break;
+//     case 'room':
+//       target = event.source.roomId;
+//       break;
+//     default:
+//       target = null;
+//   }
 
-  if (target) {
-    if (event.source.userId) {
-      await client.getProfile(event.source.userId).then(res => {
-        console.log('user profile info', res);
-        displayName = res.displayName;
-      });
-    }
+//   if (target) {
+//     if (event.source.userId) {
+//       await client.getProfile(event.source.userId).then(res => {
+//         console.log('user profile info', res);
+//         displayName = res.displayName;
+//       });
+//     }
 
-    client.pushMessage(
-      target,
-      createTextMessage(`Wah, ${displayName ?? 'anon'} unsent apa tuh`)
-    );
-  }
-};
+//     client.pushMessage(
+//       target,
+//       createTextMessage(`Wah, ${displayName ?? 'anon'} unsent apa tuh`)
+//     );
+//   }
+// };
 
 // #2 Telegram Bot Section
 

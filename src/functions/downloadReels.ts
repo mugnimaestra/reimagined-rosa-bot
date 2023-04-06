@@ -25,7 +25,6 @@ const getReelsVideoUrl = async (reelUrl: string) => {
         },
       }
     );
-    console.log('the response', response);
     const videoUrl = response?.data?.video?.[0]?.video;
     return videoUrl;
   } catch (error) {

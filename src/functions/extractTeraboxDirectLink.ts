@@ -52,7 +52,6 @@ const extractTeraboxDirectLink = async (
       `https://trapi.iqbalrifai.eu.org/?id=${value_}`
     );
     const json = response.data;
-    console.log('response dsata', response.data);
     const directUrl = json.list[0].dlink;
     return { directUrl, rawResponse: response.data };
   } catch (error) {

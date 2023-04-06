@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { WebhookEvent, MessageEvent } from '@line/bot-sdk';
-import { handleTextMessage, handleUnsendEvent } from './src/bot';
+import { handleTextMessage } from './src/bot';
 
 const app = express();
 
@@ -21,8 +21,8 @@ app.post('/webhook', (req: Request, res: Response) => {
       case 'message':
         handleTextMessage(event as MessageEvent);
         break;
-      case 'unsend':
-        handleUnsendEvent(event);
+        // case 'unsend':
+        //   handleUnsendEvent(event);
         break;
       default:
         console.log(`Unknown event: ${event.type}`);
