@@ -1,5 +1,8 @@
-import { Client, MessageEvent, WebhookEvent } from '@line/bot-sdk';
-import TelegramBot, { InlineKeyboardButton } from 'node-telegram-bot-api';
+import { Client, MessageEvent } from '@line/bot-sdk';
+import TelegramBot, {
+  InlineKeyboardButton,
+  Message,
+} from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
 import { Mention, MentionTextMessage } from '../types.js';
 import { reelUrlRegex, teraboxUrlRegex } from './constant';
@@ -7,6 +10,7 @@ import {
   downloadReels,
   pickAnOption,
   extractTeraboxDirectLink,
+  bypassTeraboxFun,
 } from './functions';
 
 if (!process.env.LINE_CHANNEL_SECRET) {
@@ -137,15 +141,28 @@ export const telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, {
 
 telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
   const teraboxUrl = (match ?? [])[1];
-  const teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
-  const arrayOfListFile = teraboxResponse.rawResponse?.list;
+  let teraboxResponse;
+  if (teraboxUrl.includes('terabox.fun')) {
+    const teraboxFunResponse = await bypassTeraboxFun(teraboxUrl);
+    if (teraboxFunResponse.success) {
+      teraboxResponse = await extractTeraboxDirectLink(teraboxFunResponse.url);
+    }
+  } else {
+    teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
+  }
+
+  if (!teraboxResponse?.success) {
+    telegramBot.sendMessage(message.chat.id, 'Fetch terabox url failed');
+    return;
+  }
+  const arrayOfListFile = teraboxResponse?.data.list;
 
   // create the inline keyboard with a button for each file
   const inlineKeyboard: InlineKeyboardButton[][] | undefined =
     arrayOfListFile?.map(file => [
       {
-        text: file.server_filename,
-        url: file.dlink,
+        text: file.filename,
+        url: file.direct_link,
       },
     ]);
 
@@ -156,6 +173,14 @@ telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
     },
     reply_to_message_id: message.message_id,
   });
+});
+
+telegramBot.onText(/\/resize/, (msg: Message) => {
+  const chatId = msg.chat.id;
+  telegramBot.sendMessage(
+    chatId,
+    'Please send the image that you want to be resized.'
+  );
 });
 
 telegramBot.on('polling_error', error => {
