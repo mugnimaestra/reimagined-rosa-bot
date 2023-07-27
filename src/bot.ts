@@ -53,7 +53,8 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
   }
 
   // #2 catch and send video message from messages reel
-  if ((event.message.text.match(reelUrlRegex) ?? '')?.length > 0) {
+  // if ((event.message.text.match(reelUrlRegex) ?? '')?.length > 0) {
+  if (event.message.text.startsWith('!reels')) {
     const reelUrl = event.message.text.match(reelUrlRegex)?.[0];
     if (typeof reelUrl === 'string') {
       const videoUrl = await downloadReels(reelUrl);
@@ -62,11 +63,27 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
   }
 
   // #3 extract direct url from terabox
-  if ((event.message.text.match(teraboxUrlRegex) ?? '')?.length > 0) {
-    const teraboxUrl = event.message.text.match(teraboxUrlRegex)?.[0];
-    if (typeof teraboxUrl === 'string') {
-      const directFileUrl = await extractTeraboxDirectLink(teraboxUrl);
-      message = directFileUrl;
+  if (event.message.text.startsWith('!terabox')) {
+    const teraboxUrl = event.message.text.match(/^\!terabox (.+)/)?.[1];
+    if (teraboxUrl && teraboxUrl.includes('terabox.fun')) {
+      const teraboxFunResponse = await bypassTeraboxFun(teraboxUrl);
+      if (teraboxFunResponse.success) {
+        const teraboxResponse = await extractTeraboxDirectLink(
+          teraboxFunResponse.url
+        );
+        if (teraboxResponse.success && teraboxResponse.data.list.length > 0) {
+          const directFileUrl = teraboxResponse.data.list[0].direct_link;
+          message = directFileUrl;
+        }
+      }
+    } else if (teraboxUrl) {
+      const teraboxResponse = await extractTeraboxDirectLink(teraboxUrl);
+      if (teraboxResponse.success && teraboxResponse.data.list.length > 0) {
+        const directFileUrls = teraboxResponse.data.list
+          .map(item => `${item.filename}: ${item.direct_link}`)
+          .join('\n');
+        message = directFileUrls;
+      }
     }
   }
 
@@ -173,14 +190,6 @@ telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
     },
     reply_to_message_id: message.message_id,
   });
-});
-
-telegramBot.onText(/\/resize/, (msg: Message) => {
-  const chatId = msg.chat.id;
-  telegramBot.sendMessage(
-    chatId,
-    'Please send the image that you want to be resized.'
-  );
 });
 
 telegramBot.on('polling_error', error => {
