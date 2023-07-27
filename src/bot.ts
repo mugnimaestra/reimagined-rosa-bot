@@ -72,8 +72,10 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
           teraboxFunResponse.url
         );
         if (teraboxResponse.success && teraboxResponse.data.list.length > 0) {
-          const directFileUrl = teraboxResponse.data.list[0].direct_link;
-          message = directFileUrl;
+          const directFileUrls = teraboxResponse.data.list
+            .map(item => `${item.filename}: ${item.direct_link}`)
+            .join('\n');
+          message = directFileUrls;
         }
       }
     } else if (teraboxUrl) {
