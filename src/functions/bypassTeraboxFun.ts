@@ -1,24 +1,18 @@
 import axios, { AxiosResponse } from 'axios';
 
-interface TeraboxDirectLink {
-  filename: string;
-  filesize: string;
-  date: string;
-  direct_link: string;
-}
-
 interface TeraboxApiResponse {
   success: boolean;
-  data: {
-    username: string;
-    list: TeraboxDirectLink[];
-  };
+  url: string;
 }
 
-export default async function extractTeraboxDirectLink(
+export default async function bypassTeraboxFun(
   url: string
 ): Promise<TeraboxApiResponse> {
-  const apiUrl = 'https://api.hunternblz.com/terabox';
+  //   if (!url.startsWith('https://terabox.fun')) {
+  //     throw new Error('Invalid URL. The URL must start with "https://terabox.fun".');
+  //   }
+
+  const apiURL = 'https://api.hunternblz.com/terabox';
   const headers = {
     authority: 'api.hunternblz.com',
     accept: '*/*',
@@ -44,7 +38,7 @@ export default async function extractTeraboxDirectLink(
 
   try {
     const response: AxiosResponse<TeraboxApiResponse> = await axios.post(
-      apiUrl,
+      apiURL,
       data.toString(),
       { headers }
     );
@@ -56,26 +50,10 @@ export default async function extractTeraboxDirectLink(
 }
 
 // Example usage:
-// const teraboxURL = 'https://teraboxapp.com/s/1cg52TzuNvC1Fd-RHRqCXNA';
-// extractTeraboxDirectLink(teraboxURL)
+// const teraboxURL = 'https://terabox.fun/sl/3XCTVvgx6Y';
+// bypassTeraboxFun(teraboxURL)
 //   .then((data) => {
-//     console.log(data);
-//     /*
-//     {
-//       success: true,
-//       data: {
-//         username: 'x**0u',
-//         list: [
-//           {
-//             filename: 'e_s2_e.rar',
-//             filesize: '709.25 MB',
-//             date: '2023-07-22 05:09',
-//             direct_link: 'https://d.4funbox.com/file/7d704309841db510140d1aaae312a35f?fid=4400758739895-250528-962527272793665&dstime=1690468475&expires=1690483000&rt=sh&chkv=1&sign=FDtERVA-DCb740ccc5511e5e8fedcff06b081203-xWp4pFPA4mhdlbcoJ7I8JI5wTAg%3D&r=936265259&sharesign=8Tm3gZXDulYn6sya/BQqAb5ojDlCCdIevk6OB1nchiAUaq4nNxaQ15JSedsTcL4HG63Ny1W599Btewmst2cpDfeuNG+uqOdPzspCUxkt9/wO5WmSW1ZUwYSZ+qZk4xIXfkLOR2WzFOONf59SPn3ie5xwajpXstpaIQDH9QyQQe71oqSI/RcLDyF6c7zlKz1fYFMOdPJjIUcsENawI9k2Xkhrc6hzoYnUWW74Az4Y8XfczU2T48OCrOPZJKql6gg3CF44hkdDB7vNBDcHNIWZ/A867PbY8oMFMRKogZkk5Jy/A2BG3YbeOLQDGnR0wLIu&sh=1'
-//           }
-//         ]
-//       }
-//     }
-//     */
+//     console.log(data); // { success: true, url: 'https://teraboxapp.com/s/1cg52TzuNvC1Fd-RHRqCXNA' }
 //     // Handle the response data as needed
 //   })
 //   .catch((error) => {
