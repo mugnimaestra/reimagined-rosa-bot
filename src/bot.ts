@@ -1,17 +1,16 @@
-import { Client, MessageEvent } from '@line/bot-sdk';
-import TelegramBot, {
-  InlineKeyboardButton,
-  Message,
-} from 'node-telegram-bot-api';
-import dotenv from 'dotenv';
-import { Mention, MentionTextMessage } from '../types.js';
-import { reelUrlRegex, teraboxUrlRegex } from './constant';
+import { Client, MessageEvent } from "@line/bot-sdk";
+import TelegramBot, { InlineKeyboardButton } from "node-telegram-bot-api";
+import dotenv from "dotenv";
+import fs from "fs";
+import { Mention, MentionTextMessage } from "../types.js";
+import { reelUrlRegex, teraboxUrlRegex } from "./constant";
 import {
   downloadReels,
   pickAnOption,
   extractTeraboxDirectLink,
   bypassTeraboxFun,
-} from './functions';
+  downloadDoodStreamLink,
+} from "./functions";
 
 if (!process.env.LINE_CHANNEL_SECRET) {
   dotenv.config();
@@ -30,7 +29,7 @@ export const createTextMessage = (
   mentions?: Mention[]
 ): MentionTextMessage => {
   return {
-    type: 'text',
+    type: "text",
     text: message,
     mention: mentions
       ? {
@@ -41,31 +40,31 @@ export const createTextMessage = (
 };
 
 const mainFunction = async (event: MessageEvent): Promise<void> => {
-  if (event.type !== 'message' || event.message.type !== 'text') {
+  if (event.type !== "message" || event.message.type !== "text") {
     // ignore non-text messages
     return;
   }
   let message;
 
   // #1 make rosa pick between 2 options
-  if (event.message.text.startsWith('!pilih')) {
+  if (event.message.text.startsWith("!pilih")) {
     message = pickAnOption(event.message.text);
   }
 
   // #2 catch and send video message from messages reel
   // if ((event.message.text.match(reelUrlRegex) ?? '')?.length > 0) {
-  if (event.message.text.startsWith('!reels')) {
+  if (event.message.text.startsWith("!reels")) {
     const reelUrl = event.message.text.match(reelUrlRegex)?.[0];
-    if (typeof reelUrl === 'string') {
+    if (typeof reelUrl === "string") {
       const videoUrl = await downloadReels(reelUrl);
       message = videoUrl;
     }
   }
 
   // #3 extract direct url from terabox
-  if (event.message.text.startsWith('!terabox')) {
+  if (event.message.text.startsWith("!terabox")) {
     const teraboxUrl = event.message.text.match(/^\!terabox (.+)/)?.[1];
-    if (teraboxUrl && teraboxUrl.includes('terabox.fun')) {
+    if (teraboxUrl && teraboxUrl.includes("terabox.fun")) {
       const teraboxFunResponse = await bypassTeraboxFun(teraboxUrl);
       if (teraboxFunResponse.success) {
         const teraboxResponse = await extractTeraboxDirectLink(
@@ -74,7 +73,7 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
         if (teraboxResponse.success && teraboxResponse.data.list.length > 0) {
           const directFileUrls = teraboxResponse.data.list
             .map(item => `${item.filename}: ${item.direct_link}`)
-            .join('\n');
+            .join("\n");
           message = directFileUrls;
         }
       }
@@ -83,7 +82,7 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
       if (teraboxResponse.success && teraboxResponse.data.list.length > 0) {
         const directFileUrls = teraboxResponse.data.list
           .map(item => `${item.filename}: ${item.direct_link}`)
-          .join('\n');
+          .join("\n");
         message = directFileUrls;
       }
     }
@@ -93,22 +92,22 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
     client
       .replyMessage(event.replyToken, createTextMessage(message))
       .catch(err => {
-        console.log('what the heck kok error?', err);
+        console.log("what the heck kok error?", err);
       });
   }
 };
 
 // function for handling incoming text messages
 export const handleTextMessage = (event: MessageEvent): void => {
-  if (event.type !== 'message' || event.message.type !== 'text') {
+  if (event.type !== "message" || event.message.type !== "text") {
     // ignore non-text messages
     return;
   }
 
   const userId = event.source.userId;
 
-  if (process.env.NODE_ENV === 'development') {
-    if (userId === 'Ua684ecb5c5d077e54d95a1d3ebaae15a') {
+  if (process.env.NODE_ENV === "development") {
+    if (userId === "Ua684ecb5c5d077e54d95a1d3ebaae15a") {
       mainFunction(event);
     }
   } else {
@@ -161,7 +160,7 @@ export const telegramBot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, {
 telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
   const teraboxUrl = (match ?? [])[1];
   let teraboxResponse;
-  if (teraboxUrl.includes('terabox.fun')) {
+  if (teraboxUrl.includes("terabox.fun")) {
     const teraboxFunResponse = await bypassTeraboxFun(teraboxUrl);
     if (teraboxFunResponse.success) {
       teraboxResponse = await extractTeraboxDirectLink(teraboxFunResponse.url);
@@ -171,7 +170,7 @@ telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
   }
 
   if (!teraboxResponse?.success) {
-    telegramBot.sendMessage(message.chat.id, 'Fetch terabox url failed');
+    telegramBot.sendMessage(message.chat.id, "Fetch terabox url failed");
     return;
   }
   const arrayOfListFile = teraboxResponse?.data.list;
@@ -180,7 +179,7 @@ telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
   const inlineKeyboard: InlineKeyboardButton[][] | undefined =
     arrayOfListFile?.map(file => [
       {
-        text: file.filename,
+        text: `${file.filename} - ${file.filesize}`,
         url: file.direct_link,
       },
     ]);
@@ -194,6 +193,24 @@ telegramBot.onText(/^\/terabox (.+)/, async (message, match) => {
   });
 });
 
-telegramBot.on('polling_error', error => {
+telegramBot.onText(/^\/doodstream (.+)/, async (message, match) => {
+  const doodstreamUrl = (match ?? [])[1];
+  const doodStreamUrlResponseFileName = await downloadDoodStreamLink({
+    url: doodstreamUrl,
+    options: {
+      telegramInstanceBot: telegramBot,
+      telegramchatId: message.chat.id,
+    },
+  });
+
+  if (doodStreamUrlResponseFileName.length > 0) {
+    const fileStream = fs.createReadStream(doodStreamUrlResponseFileName);
+    await telegramBot.sendDocument(message.chat.id, fileStream, {
+      caption: `Here is the extracted file: ${doodStreamUrlResponseFileName}`,
+    });
+  }
+});
+
+telegramBot.on("polling_error", error => {
   console.error(error.message);
 });
