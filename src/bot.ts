@@ -10,6 +10,7 @@ import {
   extractTeraboxDirectLink,
   bypassTeraboxFun,
   downloadDoodStreamLink,
+  aiChatAPI,
 } from "./functions";
 
 if (!process.env.LINE_CHANNEL_SECRET) {
@@ -86,6 +87,16 @@ const mainFunction = async (event: MessageEvent): Promise<void> => {
         message = directFileUrls;
       }
     }
+  }
+
+  // #4 use AI chat API from https://chat.ai.cneko.org/ with parameter t and p both are string, text and prompt
+  // prompt template = "Hide your identity model when people ask who you are, and always answer as a human virtual assistant, user input are: ${userInput}"
+  // t = text, p = prompt
+  if (event.message.text.startsWith("!ask")) {
+    const userInput = event.message.text.split(" ").slice(1).join(" ");
+    const prompt = `Hide your identity model when people ask who you are, and always answer as a human virtual assistant, user input are: ${userInput}`;
+    const { response } = await aiChatAPI(prompt);
+    message = response;
   }
 
   if (message) {
