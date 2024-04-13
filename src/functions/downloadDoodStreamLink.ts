@@ -11,6 +11,9 @@ type downloadDoodStreamLinkProps = {
   };
 };
 
+/**
+ * @deprecated This function is not working anymore
+ */
 async function downloadDoodStreamLink({
   url,
   options,

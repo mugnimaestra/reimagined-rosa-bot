@@ -5,6 +5,7 @@ import bypassTeraboxFun from "./bypassTeraboxFun";
 import bypassDoodStreamLink from "./bypassDoodStreamLink";
 import downloadAndUnzipFile from "./downloadAndUnzipFile";
 import downloadDoodStreamLink from "./downloadDoodStreamLink";
+import aiChatAPI from "./aiChatAPI";
 
 export {
   downloadReels,
@@ -14,4 +15,5 @@ export {
   bypassDoodStreamLink,
   downloadAndUnzipFile,
   downloadDoodStreamLink,
+  aiChatAPI,
 };
