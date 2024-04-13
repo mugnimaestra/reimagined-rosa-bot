@@ -222,6 +222,14 @@ telegramBot.onText(/^\/doodstream (.+)/, async (message, match) => {
   }
 });
 
+// use the same aichat api from above for telegrambot implementation
+telegramBot.onText(/^\/ask (.+)/, async (message, match) => {
+  const userInput = (match ?? [])[1];
+  const prompt = `Hide your identity model when people ask who you are, and always answer as a human virtual assistant, your name is Rosa, try answeing any user input in Bahasa Indonesia if possible, user input are: ${userInput}`;
+  const { response } = await aiChatAPI(prompt);
+  telegramBot.sendMessage(message.chat.id, response);
+});
+
 telegramBot.on("polling_error", error => {
   console.error(error.message);
 });

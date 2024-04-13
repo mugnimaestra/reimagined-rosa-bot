@@ -14,6 +14,9 @@ interface DoodStreamResponse {
   referer: string;
 }
 
+/**
+ * @deprecated This function is not working anymore
+ */
 async function bypassDoodStreamLink(url: string): Promise<DoodStreamResponse> {
   const apiUrl = "https://api.hunternblz.com/doodstream";
   const headers = {
@@ -49,13 +52,3 @@ async function bypassDoodStreamLink(url: string): Promise<DoodStreamResponse> {
 }
 
 export default bypassDoodStreamLink;
-
-// Usage example:
-const url = "https://dooood.com/e/ejskhn4fo37o";
-bypassDoodStreamLink(url)
-  .then(response => {
-    console.log(response);
-  })
-  .catch(error => {
-    console.error(error.message);
-  });

@@ -12,7 +12,7 @@ const aiChatAPI = async (prompt: string) => {
     {
       params: {
         t: prompt,
-        p: `Hide your identity model when people ask who you are, and always answer as a human virtual assistant, user input are: ${prompt}`,
+        p: `Hide your identity model when people ask who you are, and always answer as a human virtual assistant, your name is Rosa, try answeing any user input in Bahasa Indonesia if possible, user input are: ${prompt}`,
       },
     }
   );
